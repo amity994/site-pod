@@ -1,0 +1,141 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Venda de Pods</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    h1, h2, p {
+      text-align: center;
+    }
+    .sabores {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .sabor {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 150px;
+      text-align: center;
+    }
+    .sabor img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      max-width: 300px;
+      margin: auto;
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 10px 0;
+    }
+    #chavePix, #infoPagamento {
+      display: none;
+      text-align: center;
+    }
+    .cronometro {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Se quiser um pod específico, chama no direct 😉</h1>  <h2>Promoção acaba em:</h2>
+  <div class="cronometro" id="promoTimer"></div>  <div class="sabores" id="listaSabores"></div>  <form id="formulario">
+    <input type="text" placeholder="Endereço" required />
+    <input type="text" placeholder="Número" required />
+    <select required>
+      <option value="">Escolha seu Pod</option>
+    </select>
+    <button type="submit">Comprar</button>
+  </form>  <div id="chavePix">
+    <p>Copie a chave PIX:</p>
+    <button onclick="copiarPix()">53322466841</button>
+  </div>  <div id="infoPagamento">
+    <h2>Faça o Pix antes de dar 10m</h2>
+    <div class="cronometro" id="pagamentoTimer"></div>
+    <p>Obrigada pela compra.</p>
+  </div>  <script>
+    const sabores = [
+      "Uva", "Fresh Ice", "Morango", "Menta", "Maçã Verde",
+      "Melancia", "Blueberry", "Abacaxi", "Cereja", "Limão",
+      "Café", "Hortelã", "Banana", "Pêssego", "Framboesa",
+      "Maracujá", "Lichia", "Melão", "Coco", "Chocolate"
+    ];
+
+    const lista = document.getElementById("listaSabores");
+    const select = document.querySelector("select");
+
+    sabores.forEach((sabor) => {
+      const preco = Math.floor(Math.random() * 131 + 50); // entre 50 e 180
+      const imagem = `https://source.unsplash.com/featured/?${encodeURIComponent(sabor + ' vape')}`;
+      lista.innerHTML += `
+        <div class="sabor">
+          <img src="${imagem}" alt="${sabor}" />
+          <p><strong>${sabor}</strong></p>
+          <p>R$ ${preco}</p>
+        </div>
+      `;
+      select.innerHTML += `<option value="${sabor}">${sabor}</option>`;
+    });
+
+    function iniciarTimer(id, duracaoSegundos, reiniciar = true) {
+      let tempo = duracaoSegundos;
+      const elemento = document.getElementById(id);
+      const key = id + '_inicio';
+      if (reiniciar) {
+        const salvo = localStorage.getItem(key);
+        const agora = Date.now();
+        if (salvo) {
+          const diff = Math.floor((agora - parseInt(salvo)) / 1000);
+          tempo = duracaoSegundos - (diff % duracaoSegundos);
+        } else {
+          localStorage.setItem(key, agora);
+        }
+      }
+      const timer = setInterval(() => {
+        const horas = Math.floor(tempo / 3600);
+        const minutos = Math.floor((tempo % 3600) / 60);
+        const segundos = tempo % 60;
+        elemento.textContent = `${horas.toString().padStart(2,'0')}:${minutos.toString().padStart(2,'0')}:${segundos.toString().padStart(2,'0')}`;
+        tempo--;
+        if (tempo < 0) {
+          if (reiniciar) tempo = duracaoSegundos;
+          else clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    iniciarTimer("promoTimer", 3 * 3600);
+
+    document.getElementById("formulario").addEventListener("submit", function(e) {
+      e.preventDefault();
+      document.getElementById("formulario").style.display = "none";
+      document.getElementById("chavePix").style.display = "block";
+    });
+
+    function copiarPix() {
+      navigator.clipboard.writeText("53322466841").then(() => {
+        document.getElementById("chavePix").style.display = "none";
+        document.getElementById("infoPagamento").style.display = "block";
+        iniciarTimer("pagamentoTimer", 600, false); // 10 minutos
+      });
+    }
+  </script></body>
+</html>
